@@ -4,33 +4,31 @@ import pickle
 import datetime
 import shap
 import random
+import xgboost as xgb
+from io import BytesIO
 from faker import Faker
 from matplotlib import pyplot as plt
+from azure.storage.blob import BlobServiceClient
 
-storage_account_name = "stgclickbuspythonrangers"
-container_name = "cbdata-gold"
-file_name = "<file_name>"
-sas_token = st.secrets["sas_token"]
-blob_url = f"https://{storage_account_name}.blob.core.windows.net/{container_name}/{file_name}?{sas_token}"
-
-# Carregar modelos treinados
-modelo_dia = pickle.load(open("Streamlit/Modelos/xgboost_model_dia_exato.pkl", "rb"))
-modelo_destino = pickle.load(open("Streamlit/Modelos/xgboost_model_trecho.pkl", "rb"))
-
-# Carregar base de clientes
-st.title("Previsão de Próxima Compra por C" \
-"liente")
+st.title("Previsão de Próxima Compra por Cliente")
 
 @st.cache
 def carregar_dados():
-    df_compras = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_gold/dataframe.parquet"), engine="pyarrow")
-    features_dia = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/cb_previsao_data.parquet"), engine="pyarrow")
-    features_trecho = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/cb_previsao_trecho.parquet"), engine="pyarrow")
-    classes = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/classes.parquet"), engine="pyarrow")
-    return df_compras, features_dia, features_trecho, classes
+    df_compras = pd.read_parquet("Dados/dataframe.parquet", engine="pyarrow")
+    features_dia = pd.read_parquet("Dados/cb_previsao_data.parquet", engine="pyarrow")
+    features_trecho = pd.read_parquet("Dados/cb_previsao_trecho.parquet", engine="pyarrow")
+    classes = pd.read_parquet("Dados/classes.parquet", engine="pyarrow")
+    modelo_dia = xgb.Booster()
+    modelo_destino = xgb.Booster()
+    modelo_dia.load_model(f"Modelos/xgboost_model_dia_exato.json")
+    modelo_destino.load_model(f"Modelos/xgboost_model_trecho.json")
+    return df_compras, features_dia, features_trecho, classes, modelo_dia, modelo_destino
 
 with st.spinner("🔄 Carregando dados..."):
-   df_compras_cliente, features_dia, features_trecho, classes = carregar_dados()
+    # Carregar modelos treinados
+    # Carregar base de clientes
+    df_compras_cliente, features_dia, features_trecho, classes, modelo_dia, modelo_destino = carregar_dados()
+    st.write("✅ Dados carregados com sucesso.")
 
 # Gerar nomes fictícios com Faker
 Faker.seed(42)
