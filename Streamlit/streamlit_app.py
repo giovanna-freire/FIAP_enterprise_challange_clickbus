@@ -5,10 +5,10 @@ import datetime
 import shap
 import random
 import xgboost as xgb
+import numpy as np
 from io import BytesIO
 from faker import Faker
 from matplotlib import pyplot as plt
-from azure.storage.blob import BlobServiceClient
 
 st.title("Previsão de Próxima Compra por Cliente")
 
@@ -44,11 +44,13 @@ id_cliente = name_to_id[selected_fake_name]
 
 # Previsão de dia
 input_dia = features_dia[features_dia['id_cliente'] == id_cliente].drop(columns=["id_cliente"])
-data_prevista = modelo_dia.predict(input_dia)[0]
+input_dia_dmatrix = xgb.DMatrix(input_dia)
+data_prevista = modelo_dia.predict(input_dia_dmatrix)[0]
 
 # Previsão de destino
 input_trecho = features_trecho[features_trecho['id_cliente'] == id_cliente].drop(columns=["id_cliente"])
-destino_pred = modelo_destino.predict(input_trecho)[0]
+input_trecho_dmatrix = xgb.DMatrix(input_trecho)
+destino_pred = np.argmax(modelo_destino.predict(input_trecho_dmatrix)[0])
 
 # Classes
 todos_ids = set()
