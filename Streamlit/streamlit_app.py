@@ -35,13 +35,15 @@ with st.spinner("🔄 Carregando dados..."):
     stream = BytesIO()
     stream.write(blob_client.download_blob().readall())
     stream.seek(0)
-    modelo_dia = xgb.Booster.load_model(stream)
+    modelo_dia = xgb.Booster()
+    modelo_dia.load_model(stream)
     
     blob_client = blob_service_client.get_blob_client(container=container_name, blob='cbtickets_model/xgboost_model_trecho.json')
     stream = BytesIO()
     stream.write(blob_client.download_blob().readall())
     stream.seek(0)
-    modelo_destino = xgb.Booster.load_model(stream)
+    modelo_destino = xgb.Booster()
+    modelo_destino.load_model(stream)
     
     # Carregar base de clientes
     df_compras_cliente, features_dia, features_trecho, classes = carregar_dados()
