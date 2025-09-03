@@ -14,8 +14,8 @@ sas_token = st.secrets["sas_token"]
 blob_url = f"https://{storage_account_name}.blob.core.windows.net/{container_name}/{file_name}?{sas_token}"
 
 # Carregar modelos treinados
-modelo_dia = pickle.load(open("Modelos/xgboost_model_dia_exato.pkl", "rb"))
-modelo_destino = pickle.load(open("Modelos/xgboost_model_trecho.pkl", "rb"))
+modelo_dia = pickle.load(open("./Modelos/xgboost_model_dia_exato.pkl", "rb"))
+modelo_destino = pickle.load(open("./Modelos/xgboost_model_trecho.pkl", "rb"))
 
 # Carregar base de clientes
 st.title("Previsão de Próxima Compra por C" \
