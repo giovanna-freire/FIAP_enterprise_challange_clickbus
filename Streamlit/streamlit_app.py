@@ -10,26 +10,23 @@ from faker import Faker
 from matplotlib import pyplot as plt
 from azure.storage.blob import BlobServiceClient
 
-storage_account_name = "stgclickbuspythonrangers"
-container_name = "cbdata-gold"
-file_name = "<file_name>"
-sas_token = st.secrets["sas_token"]
-blob_url = f"https://{storage_account_name}.blob.core.windows.net/{container_name}/{file_name}?{sas_token}"
-
 st.title("Previsão de Próxima Compra por Cliente")
 
 @st.cache_data(ttl=3600)  # cache por 1h
 def carregar_dados():
     st.write("🔁 Iniciando download do historico de compras...")
-    df_compras = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_gold/dataframe.parquet"), engine="pyarrow")
-    features_dia = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/cb_previsao_data.parquet"), engine="pyarrow")
+    df_compras = pd.read_parquet("Dados/dataframe.parquet", engine="pyarrow")
+    features_dia = pd.read_parquet("Dados/cb_previsao_data.parquet", engine="pyarrow")
     st.write("🔁 Iniciando download dos trechos...")
-    features_trecho = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/cb_previsao_trecho.parquet"), engine="pyarrow")
-    classes = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/classes.parquet"), engine="pyarrow")
+    features_trecho = pd.read_parquet("Dados/cb_previsao_trecho.parquet", engine="pyarrow")
+    classes = pd.read_parquet("Dados/classes.parquet", engine="pyarrow")
     return df_compras, features_dia, features_trecho, classes
 
 @st.cache_resource
 def carregar_modelo(blob_name):
+    storage_account_name = "stgclickbuspythonrangers"
+    container_name = "cbdata-gold"
+    sas_token = st.secrets["sas_token"]
     model_blob_url = f"https://{storage_account_name}.blob.core.windows.net"
     blob_service_client = BlobServiceClient(account_url=model_blob_url, credential=sas_token)
     blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
