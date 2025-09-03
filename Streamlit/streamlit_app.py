@@ -12,7 +12,7 @@ from azure.storage.blob import BlobServiceClient
 
 st.title("Previsão de Próxima Compra por Cliente")
 
-@st.cache
+@st.cache_data(ttl=3600)
 def carregar_dados():
     df_compras = pd.read_parquet("Dados/dataframe.parquet", engine="pyarrow")
     features_dia = pd.read_parquet("Dados/cb_previsao_data.parquet", engine="pyarrow")
