@@ -20,22 +20,24 @@ st.title("Previsão de Próxima Compra por Cliente")
 
 @st.cache_data(ttl=3600)  # cache por 1h
 def carregar_dados():
+    st.write("🔁 Iniciando download do historico de compras...")
     df_compras = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_gold/dataframe.parquet"), engine="pyarrow")
     features_dia = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/cb_previsao_data.parquet"), engine="pyarrow")
+    st.write("🔁 Iniciando download dos trechos...")
     features_trecho = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/cb_previsao_trecho.parquet"), engine="pyarrow")
     classes = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/classes.parquet"), engine="pyarrow")
     return df_compras, features_dia, features_trecho, classes
 
 with st.spinner("🔄 Carregando dados..."):
-    # Carregar modelos treinados
+    # Carregar modelos treinados    
     model_blob_url = f"https://{storage_account_name}.blob.core.windows.net"
     blob_service_client = BlobServiceClient(account_url=model_blob_url, credential=sas_token)
-    
+    st.write("🔁 Iniciando download do modelo de previsão de data...")
     blob_client = blob_service_client.get_blob_client(container=container_name, blob='cbtickets_model/xgboost_model_dia_exato.json')
     model_bytes = blob_client.download_blob().readall()
     modelo_dia = xgb.Booster()
     modelo_dia.load_model(bytearray(model_bytes))
-    
+    st.write("🔁 Iniciando download do modelo de previsão de trecho...")
     blob_client = blob_service_client.get_blob_client(container=container_name, blob='cbtickets_model/xgboost_model_trecho.json')
     model_bytes = blob_client.download_blob().readall()
     modelo_destino = xgb.Booster()
@@ -43,6 +45,7 @@ with st.spinner("🔄 Carregando dados..."):
     
     # Carregar base de clientes
     df_compras_cliente, features_dia, features_trecho, classes = carregar_dados()
+    st.write("✅ Dados carregados com sucesso.")
 
 # Gerar nomes fictícios com Faker
 Faker.seed(42)
