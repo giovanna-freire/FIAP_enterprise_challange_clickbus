@@ -174,7 +174,7 @@ with tab1:
 
 with tab2:
     st.subheader("🛒 Histórico de Compras")
-    
+    df_compras_cliente["Trechos"] = df_compras_cliente["origem_ida"] + "_" + df_compras_cliente["destino_ida"]
     cliente_data = df_compras_cliente[df_compras_cliente['id_cliente'] == id_cliente].copy()
     
     if not cliente_data.empty:
