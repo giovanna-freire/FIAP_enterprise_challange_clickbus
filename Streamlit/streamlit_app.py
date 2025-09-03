@@ -21,7 +21,7 @@ modelo_destino = pickle.load(open("Streamlit/Modelos/xgboost_model_trecho.pkl", 
 st.title("Previsão de Próxima Compra por C" \
 "liente")
 
-@st.cache_data(ttl=3600)  # cache por 1h
+@st.cache
 def carregar_dados():
     df_compras = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_gold/dataframe.parquet"), engine="pyarrow")
     features_dia = pd.read_parquet(blob_url.replace("<file_name>", "cbtickets_model/cb_previsao_data.parquet"), engine="pyarrow")
