@@ -14,37 +14,20 @@ st.title("Previsão de Próxima Compra por Cliente")
 
 @st.cache_data(ttl=3600)  # cache por 1h
 def carregar_dados():
-    st.write("🔁 Iniciando download do historico de compras...")
     df_compras = pd.read_parquet("Dados/dataframe.parquet", engine="pyarrow")
     features_dia = pd.read_parquet("Dados/cb_previsao_data.parquet", engine="pyarrow")
-    st.write("🔁 Iniciando download dos trechos...")
     features_trecho = pd.read_parquet("Dados/cb_previsao_trecho.parquet", engine="pyarrow")
     classes = pd.read_parquet("Dados/classes.parquet", engine="pyarrow")
-    return df_compras, features_dia, features_trecho, classes
-
-@st.cache_resource
-def carregar_modelo(blob_name):
-    storage_account_name = "stgclickbuspythonrangers"
-    container_name = "cbdata-gold"
-    sas_token = st.secrets["sas_token"]
-    model_blob_url = f"https://{storage_account_name}.blob.core.windows.net"
-    blob_service_client = BlobServiceClient(account_url=model_blob_url, credential=sas_token)
-    blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
-    model_bytes = blob_client.download_blob().readall()
-    modelo = xgb.Booster()
-    modelo.load_model(bytearray(model_bytes))
-    return modelo
+    modelo_dia = xgb.Booster()
+    modelo_destino = xgb.Booster()
+    modelo_dia.load_model(f"Modelos/xgboost_model_dia_exato.json")
+    modelo_destino.load_model(f"Modelos/xgboost_model_trecho.json")
+    return df_compras, features_dia, features_trecho, classes, modelo_dia, modelo_destino
 
 with st.spinner("🔄 Carregando dados..."):
-    # Carregar modelos treinados    
-    st.write("🔁 Iniciando download do modelo de previsão de data...")
-    modelo_dia = carregar_modelo('cbtickets_model/xgboost_model_dia_exato.json')
-    
-    st.write("🔁 Iniciando download do modelo de previsão de trecho...")
-    modelo_destino = carregar_modelo('cbtickets_model/xgboost_model_trecho.json')
-    
+    # Carregar modelos treinados
     # Carregar base de clientes
-    df_compras_cliente, features_dia, features_trecho, classes = carregar_dados()
+    df_compras_cliente, features_dia, features_trecho, classes, modelo_dia, modelo_destino = carregar_dados()
     st.write("✅ Dados carregados com sucesso.")
 
 # Gerar nomes fictícios com Faker
