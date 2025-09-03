@@ -58,12 +58,17 @@ Os resultados da clusterização foram salvos no **Azure Blob Storage** e visual
 - Intervalo médio entre compras
 - Volume de compras por data
 - Distribuição dos clientes por cluster
+<img width="1489" height="780" alt="image" src="https://github.com/user-attachments/assets/f412dc99-2716-49cf-b755-0cd347fd013e" />
 
 ---
 
 ## 💻 Aplicativo Streamlit
 
 Um aplicativo interativo foi desenvolvido em **Streamlit** para prever a **data** e o **trecho** da próxima compra de um cliente, com base em seu histórico.
+<img width="946" height="650" alt="image" src="https://github.com/user-attachments/assets/7e41f059-b96a-4133-94a4-7e97f1e20b82" />
+<img width="937" height="441" alt="image" src="https://github.com/user-attachments/assets/987ec0a0-1aed-4abd-a1c1-7818a4592d40" />
+<img width="918" height="546" alt="image" src="https://github.com/user-attachments/assets/a2f833ba-29aa-448c-b8f1-8359232bf554" />
+<img width="919" height="607" alt="image" src="https://github.com/user-attachments/assets/ca838917-3b8b-4a3d-9b65-b43e6cf074ab" />
 
 ---
 
