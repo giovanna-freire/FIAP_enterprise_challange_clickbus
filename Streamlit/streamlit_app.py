@@ -4,8 +4,11 @@ import pickle
 import datetime
 import shap
 import random
+import xgboost as xgb
+from io import BytesIO
 from faker import Faker
 from matplotlib import pyplot as plt
+from azure.storage.blob import BlobServiceClient
 
 storage_account_name = "stgclickbuspythonrangers"
 container_name = "cbdata-gold"
@@ -13,13 +16,7 @@ file_name = "<file_name>"
 sas_token = st.secrets["sas_token"]
 blob_url = f"https://{storage_account_name}.blob.core.windows.net/{container_name}/{file_name}?{sas_token}"
 
-# Carregar modelos treinados
-modelo_dia = pickle.load(open("Streamlit/Modelos/xgboost_model_dia_exato.pkl", "rb"))
-modelo_destino = pickle.load(open("Streamlit/Modelos/xgboost_model_trecho.pkl", "rb"))
-
-# Carregar base de clientes
-st.title("Previsão de Próxima Compra por C" \
-"liente")
+st.title("Previsão de Próxima Compra por Cliente")
 
 @st.cache_data(ttl=3600)  # cache por 1h
 def carregar_dados():
@@ -30,7 +27,24 @@ def carregar_dados():
     return df_compras, features_dia, features_trecho, classes
 
 with st.spinner("🔄 Carregando dados..."):
-   df_compras_cliente, features_dia, features_trecho, classes = carregar_dados()
+    # Carregar modelos treinados
+    model_blob_url = f"https://{storage_account_name}.blob.core.windows.net"
+    blob_service_client = BlobServiceClient(account_url=model_blob_url, credential=sas_token)
+    
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob='cbtickets_model/xgboost_model_dia_exato.json')
+    stream = BytesIO()
+    stream.write(blob_client.download_blob().readall())
+    stream.seek(0)
+    modelo_dia = xgb.Booster.load_model(stream)
+    
+    blob_client = blob_service_client.get_blob_client(container=container_name, blob='cbtickets_model/xgboost_model_trecho.json')
+    stream = BytesIO()
+    stream.write(blob_client.download_blob().readall())
+    stream.seek(0)
+    modelo_destino = xgb.Booster.load_model(stream)
+    
+    # Carregar base de clientes
+    df_compras_cliente, features_dia, features_trecho, classes = carregar_dados()
 
 # Gerar nomes fictícios com Faker
 Faker.seed(42)
